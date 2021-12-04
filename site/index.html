@@ -1,0 +1,74 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="mdzdoc-css/main.css" type="text/css" charset="utf-8">
+    <title>Notes on Janet</title>
+    <meta name="description" content="">
+  </head>
+  <body>
+    <!-- Toggles Navigation -->
+    <div id="toc-toggle" class="">
+      <div class="bar topbar"></div>
+      <div class="bar"></div>
+      <div class="bar botbar"></div>
+    </div>
+    <div class="twocol">
+      <div class="toc toc-hidden">
+        <ul>
+          <li><span class="selected"><a href="index.html">Notes on Janet</a></span></li><li class="caret"><span><a href="generators/index.html">Generators</a></span><ul><li><span><a href="generators/useful.html">Useful generators</a></span></li></ul></li>
+        </ul>
+      </div>
+      <div class="content-wrapper">
+        <h1>Notes on Janet</h1>
+        <div class="prevnext-bar">
+          <span class="prev"><a href="generators/useful.html"><span class="prevnext-text">Useful generators</span></a></span>
+          <span class="next"><a href="generators/index.html"><span class="prevnext-text">Generators</span></a></span>
+        </div>
+        
+
+<p>A place to document things I learned about Janet so I do not have to figure them out again...
+</p>
+
+<h2 id="Misc-6">Misc
+</h2>
+<ul>
+ <li><code class="mendoza-code">map</code> takes up to 4 inputs, so you can use it to zip arrays together</li>
+ <li><code class="mendoza-code">values</code> creates an array from values returned by a fiber</li>
+ <li><code class="mendoza-code">generate</code> is an easy way to create generators using <code class="mendoza-code">loop</code> syntax</li>
+</ul>
+        <div class="prevnext-bar">
+          <span class="prev"><a href="generators/useful.html"><span class="prevnext-text">Useful generators</span></a></span>
+          <span class="next"><a href="generators/index.html"><span class="prevnext-text">Generators</span></a></span>
+        </div>
+      </div>
+    </div>
+    <script charset="utf-8">
+      function toggleToc() {
+        var toggler = document.getElementById('toc-toggle');
+        var wrapper = document.querySelector('.toc');
+        wrapper.classList.toggle('toc-hidden');
+        toggler.classList.toggle('open');
+        window.localStorage.setItem('show-toc', toggler.classList.contains('open'));
+      }
+      function addTocToggle() {
+        var el = document.getElementById('toc-toggle');
+        el.addEventListener('click', toggleToc);
+      }
+      window.addEventListener('DOMContentLoaded', addTocToggle);
+      if (window.localStorage.getItem('show-toc') === 'true') {
+        toggleToc()
+      }
+    </script>
+    <footer>
+      <div class="content-wrapper">
+        Copyright &copy; Felix Riedel 2021
+      </div>
+    </footer>
+  </body>
+</html>

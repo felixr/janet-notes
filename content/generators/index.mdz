@@ -1,0 +1,80 @@
+{:title "Generators"
+ :template "mdzdoc/main.html"
+ :author "Felix Riedel"
+}
+---
+
+The @link[https://janet-lang.org/docs/fibers/index.html]{Janet docs on Fibers} gives a short intro on how to use Fibers as generators, but more examples always help...
+
+You might know generators from Python:
+
+@codeblock```
+def ones():
+  while True:
+      yield 1
+```
+
+In Janet this generator would be
+
+@codeblock[janet]```
+(defn ones []
+  (fiber-fn :y []
+    (forever (yield 1))))
+```
+
+This gives you in principle an infinite series of ones, but they are only
+generated as you request them. You can use @code[resume] to resume a fiber (ie.
+the generator), run it to the next @code[yield] and get the next value.
+
+@codeblock[janet]```
+(defn take3 [f]
+  (tuple (resume g) (resume g) (resume g)))
+```
+
+## Using @code[next]
+
+If you want to make @code[take3] also work with arrays and tuples, you need to
+use @code[next] to iterate through keys and @code[in] to retrieve a value:
+
+@codeblock[janet]```
+(defn take3 
+  "Returns the first 3 values of a fiber or data structure."
+  [ind]
+  (var k (next ind))
+  (def ret @[])
+  (repeat 3 
+      (array/push ret (in ind k))
+      (set k (next ind k)))
+  ret)
+
+(take3 (ones)) # => @[1 1 1]
+# .. but also
+(take3 [1 2 3 4]) # => @[1 2 3])
+```
+
+### Knowing when to stop 
+
+Not all generators are infinite and often want to go through all values of a
+generator and stop when nothing is left. Conveniently @code[next] will return
+@code[nil] when there is no more value to take.
+
+
+@codeblock[janet]```
+(defn chain2
+  "Chain two fibers or data structures together"
+  [a b]
+ (fiber-fn :y [] 
+    (var k (next a))
+    (while (not= k nil) 
+      (yield (in a k))
+      (set k (next a k)))
+    # onto the second input...
+    (set k (next b))
+    (while (not= k nil) 
+      (yield (in b k))
+      (set k (next b k)))))
+
+(values (chain2 [1 2 3] [10 11 12 13])) # => @[1 2 3 10 11 12 13]
+# note: `values` takes all the values returned by a fiber and 
+# returns them in an array
+```

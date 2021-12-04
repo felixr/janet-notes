@@ -1,0 +1,110 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="../mdzdoc-css/main.css" type="text/css" charset="utf-8">
+    <title>Useful generators</title>
+    <meta name="description" content="">
+  </head>
+  <body>
+    <!-- Toggles Navigation -->
+    <div id="toc-toggle" class="">
+      <div class="bar topbar"></div>
+      <div class="bar"></div>
+      <div class="bar botbar"></div>
+    </div>
+    <div class="twocol">
+      <div class="toc toc-hidden">
+        <ul>
+          <li><span><a href="../index.html">Notes on Janet</a></span></li><li class="caret"><span><a href="index.html">Generators</a></span><ul><li><span class="selected"><a href="useful.html">Useful generators</a></span></li></ul></li>
+        </ul>
+      </div>
+      <div class="content-wrapper">
+        <h1>Useful generators</h1>
+        <div class="prevnext-bar">
+          <span class="prev"><a href="index.html"><span class="prevnext-text">Generators</span></a></span>
+          <span class="next"><a href="../index.html"><span class="prevnext-text">Notes on Janet</span></a></span>
+        </div>
+        
+
+
+<h3 id="iota-30">iota 
+</h3>
+<p>Similar to <code class="mendoza-code">range</code> but returns a generator instead of an array.
+</p>
+<pre class="mendoza-codeblock"><code data-language="janet">(<span class="mdzsyn-coresym">defn</span> <span class="mdzsyn-symbol">iota</span> [<span class="mdzsyn-symbol">n</span>]
+  (<span class="mdzsyn-coresym">generate</span> [<span class="mdzsyn-symbol">i</span> <span class="mdzsyn-keyword">:range</span> [<span class="mdzsyn-number">0</span> <span class="mdzsyn-symbol">n</span>]] <span class="mdzsyn-symbol">i</span>))
+
+(<span class="mdzsyn-coresym">values</span> (<span class="mdzsyn-symbol">iota</span> <span class="mdzsyn-number">3</span>)) <span class="mdzsyn-comment"># =&gt; @[0 1 2]</span></code></pre><h3 id="zip-27">zip
+</h3>
+<p>Given multiple generators, <code class="mendoza-code">zip</code> returns a generator that yields arrays
+with one value from each input generator. It stops when on of the inputs is out
+of elements.
+</p>
+<pre class="mendoza-codeblock"><code data-language="janet">(<span class="mdzsyn-coresym">defn</span> <span class="mdzsyn-symbol">zip</span>
+  [<span class="mdzsyn-symbol">&amp;</span> <span class="mdzsyn-symbol">rest</span>]
+  (<span class="mdzsyn-coresym">fiber/new</span>
+    (<span class="mdzsyn-coresym">fn</span> []
+      (<span class="mdzsyn-coresym">var</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">map</span> <span class="mdzsyn-coresym">next</span> <span class="mdzsyn-symbol">rest</span>))
+      (<span class="mdzsyn-coresym">while</span> (<span class="mdzsyn-coresym">every?</span> <span class="mdzsyn-symbol">k</span>)
+        (<span class="mdzsyn-coresym">yield</span> (<span class="mdzsyn-coresym">seq</span> [<span class="mdzsyn-symbol">i</span> <span class="mdzsyn-keyword">:range</span> [<span class="mdzsyn-number">0</span> (<span class="mdzsyn-coresym">length</span> <span class="mdzsyn-symbol">rest</span>)]]
+                 (<span class="mdzsyn-coresym">in</span> (<span class="mdzsyn-coresym">in</span> <span class="mdzsyn-symbol">rest</span> <span class="mdzsyn-symbol">i</span>) (<span class="mdzsyn-coresym">in</span> <span class="mdzsyn-symbol">k</span> <span class="mdzsyn-symbol">i</span>))))
+        (<span class="mdzsyn-coresym">set</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">seq</span> [<span class="mdzsyn-symbol">i</span> <span class="mdzsyn-keyword">:range</span> [<span class="mdzsyn-number">0</span> (<span class="mdzsyn-coresym">length</span> <span class="mdzsyn-symbol">rest</span>)]]
+                 (<span class="mdzsyn-coresym">next</span> (<span class="mdzsyn-coresym">in</span> <span class="mdzsyn-symbol">rest</span> <span class="mdzsyn-symbol">i</span>) (<span class="mdzsyn-coresym">in</span> <span class="mdzsyn-symbol">k</span> <span class="mdzsyn-symbol">i</span>))))))))
+
+(<span class="mdzsyn-coresym">values</span> (<span class="mdzsyn-symbol">zip</span> [<span class="mdzsyn-string">"a"</span> <span class="mdzsyn-string">"b"</span> <span class="mdzsyn-string">"c"</span>] (<span class="mdzsyn-symbol">iota</span> <span class="mdzsyn-number">100</span>))) <span class="mdzsyn-comment"># =&gt; @[0 1 2] @[@["a" 0] @["b" 1] @["c" 2]]</span>
+
+<span class="mdzsyn-comment"># Note: `map` can also take up to 4 generators or data structures</span>
+(<span class="mdzsyn-coresym">map</span> <span class="mdzsyn-coresym">tuple</span> [<span class="mdzsyn-string">"a"</span> <span class="mdzsyn-string">"b"</span> <span class="mdzsyn-string">"c"</span>] (<span class="mdzsyn-symbol">iota</span> <span class="mdzsyn-number">100</span>)) <span class="mdzsyn-comment"># =&gt; @[("a" 0) ("b" 1) ("c" 2)]</span></code></pre><h3 id="window-14">window
+</h3>
+<pre class="mendoza-codeblock"><code data-language="janet">(<span class="mdzsyn-coresym">defn</span> <span class="mdzsyn-symbol">window</span> [<span class="mdzsyn-symbol">n</span> <span class="mdzsyn-symbol">ds</span>]
+  (<span class="mdzsyn-coresym">fiber-fn</span> <span class="mdzsyn-keyword">:yi</span> []
+            (<span class="mdzsyn-coresym">var</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">next</span> <span class="mdzsyn-symbol">ds</span>))
+            (<span class="mdzsyn-coresym">var</span> <span class="mdzsyn-symbol">win</span> @[])
+            (<span class="mdzsyn-coresym">loop</span> [<span class="mdzsyn-keyword">:repeat</span> <span class="mdzsyn-symbol">n</span>]
+              (<span class="mdzsyn-coresym">array/push</span> <span class="mdzsyn-symbol">win</span> (<span class="mdzsyn-coresym">in</span> <span class="mdzsyn-symbol">ds</span> <span class="mdzsyn-symbol">k</span>))
+              (<span class="mdzsyn-coresym">set</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">next</span> <span class="mdzsyn-symbol">ds</span> <span class="mdzsyn-symbol">k</span>)))
+            (<span class="mdzsyn-coresym">yield</span> <span class="mdzsyn-symbol">win</span>)
+            (<span class="mdzsyn-coresym">while</span> (<span class="mdzsyn-coresym">not=</span> <span class="mdzsyn-symbol">k</span> <span class="mdzsyn-constant">nil</span>)
+              (<span class="mdzsyn-coresym">set</span> <span class="mdzsyn-symbol">win</span> (<span class="mdzsyn-coresym">array/slice</span> <span class="mdzsyn-symbol">win</span> <span class="mdzsyn-number">1</span>))
+              (<span class="mdzsyn-coresym">array/push</span> <span class="mdzsyn-symbol">win</span> (<span class="mdzsyn-coresym">in</span> <span class="mdzsyn-symbol">ds</span> <span class="mdzsyn-symbol">k</span>))
+              (<span class="mdzsyn-coresym">yield</span> <span class="mdzsyn-symbol">win</span>)
+              (<span class="mdzsyn-coresym">set</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">next</span> <span class="mdzsyn-symbol">ds</span> <span class="mdzsyn-symbol">k</span>)))
+            <span class="mdzsyn-symbol">win</span>))
+
+(<span class="mdzsyn-coresym">values</span> (<span class="mdzsyn-symbol">window</span> <span class="mdzsyn-number">3</span> (<span class="mdzsyn-symbol">iota</span> <span class="mdzsyn-number">5</span>))) <span class="mdzsyn-comment"># =&gt; @[@[0 1 2] @[1 2 3] @[2 3 4]]</span></code></pre>
+        <div class="prevnext-bar">
+          <span class="prev"><a href="index.html"><span class="prevnext-text">Generators</span></a></span>
+          <span class="next"><a href="../index.html"><span class="prevnext-text">Notes on Janet</span></a></span>
+        </div>
+      </div>
+    </div>
+    <script charset="utf-8">
+      function toggleToc() {
+        var toggler = document.getElementById('toc-toggle');
+        var wrapper = document.querySelector('.toc');
+        wrapper.classList.toggle('toc-hidden');
+        toggler.classList.toggle('open');
+        window.localStorage.setItem('show-toc', toggler.classList.contains('open'));
+      }
+      function addTocToggle() {
+        var el = document.getElementById('toc-toggle');
+        el.addEventListener('click', toggleToc);
+      }
+      window.addEventListener('DOMContentLoaded', addTocToggle);
+      if (window.localStorage.getItem('show-toc') === 'true') {
+        toggleToc()
+      }
+    </script>
+    <footer>
+      <div class="content-wrapper">
+        Copyright &copy; Felix Riedel 2021
+      </div>
+    </footer>
+  </body>
+</html>

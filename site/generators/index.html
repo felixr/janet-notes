@@ -1,0 +1,120 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="../mdzdoc-css/main.css" type="text/css" charset="utf-8">
+    <title>Generators</title>
+    <meta name="description" content="">
+  </head>
+  <body>
+    <!-- Toggles Navigation -->
+    <div id="toc-toggle" class="">
+      <div class="bar topbar"></div>
+      <div class="bar"></div>
+      <div class="bar botbar"></div>
+    </div>
+    <div class="twocol">
+      <div class="toc toc-hidden">
+        <ul>
+          <li><span><a href="../index.html">Notes on Janet</a></span></li><li class="caret"><span class="selected"><a href="index.html">Generators</a></span><ul><li><span><a href="useful.html">Useful generators</a></span></li></ul></li>
+        </ul>
+      </div>
+      <div class="content-wrapper">
+        <h1>Generators</h1>
+        <div class="prevnext-bar">
+          <span class="prev"><a href="../index.html"><span class="prevnext-text">Notes on Janet</span></a></span>
+          <span class="next"><a href="useful.html"><span class="prevnext-text">Useful generators</span></a></span>
+        </div>
+        
+
+<p>The <a href="https://janet-lang.org/docs/fibers/index.html">Janet docs on Fibers</a> gives a short intro on how to use Fibers as generators, but more examples always help...
+</p>
+<p>You might know generators from Python:
+</p>
+<pre class="mendoza-codeblock"><code>def ones():
+  while True:
+      yield 1</code></pre><p>In Janet this generator would be
+</p>
+<pre class="mendoza-codeblock"><code data-language="janet">(<span class="mdzsyn-coresym">defn</span> <span class="mdzsyn-symbol">ones</span> []
+  (<span class="mdzsyn-coresym">fiber-fn</span> <span class="mdzsyn-keyword">:y</span> []
+    (<span class="mdzsyn-coresym">forever</span> (<span class="mdzsyn-coresym">yield</span> <span class="mdzsyn-number">1</span>))))</code></pre><p>This gives you in principle an infinite series of ones, but they are only
+generated as you request them. You can use <code class="mendoza-code">resume</code> to resume a fiber (ie.
+the generator), run it to the next <code class="mendoza-code">yield</code> and get the next value.
+</p>
+<pre class="mendoza-codeblock"><code data-language="janet">(<span class="mdzsyn-coresym">defn</span> <span class="mdzsyn-symbol">take3</span> [<span class="mdzsyn-symbol">f</span>]
+  (<span class="mdzsyn-coresym">tuple</span> (<span class="mdzsyn-coresym">resume</span> <span class="mdzsyn-symbol">g</span>) (<span class="mdzsyn-coresym">resume</span> <span class="mdzsyn-symbol">g</span>) (<span class="mdzsyn-coresym">resume</span> <span class="mdzsyn-symbol">g</span>)))</code></pre><h2 id="Using-31">Using <code class="mendoza-code">next</code>
+</h2>
+<p>If you want to make <code class="mendoza-code">take3</code> also work with arrays and tuples, you need to
+use <code class="mendoza-code">next</code> to iterate through keys and <code class="mendoza-code">in</code> to retrieve a value:
+</p>
+<pre class="mendoza-codeblock"><code data-language="janet">(<span class="mdzsyn-coresym">defn</span> <span class="mdzsyn-symbol">take3</span> 
+  <span class="mdzsyn-string">"Returns the first 3 values of a fiber or data structure."</span>
+  [<span class="mdzsyn-symbol">ind</span>]
+  (<span class="mdzsyn-coresym">var</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">next</span> <span class="mdzsyn-symbol">ind</span>))
+  (<span class="mdzsyn-coresym">def</span> <span class="mdzsyn-symbol">ret</span> @[])
+  (<span class="mdzsyn-coresym">repeat</span> <span class="mdzsyn-number">3</span> 
+      (<span class="mdzsyn-coresym">array/push</span> <span class="mdzsyn-symbol">ret</span> (<span class="mdzsyn-coresym">in</span> <span class="mdzsyn-symbol">ind</span> <span class="mdzsyn-symbol">k</span>))
+      (<span class="mdzsyn-coresym">set</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">next</span> <span class="mdzsyn-symbol">ind</span> <span class="mdzsyn-symbol">k</span>)))
+  <span class="mdzsyn-symbol">ret</span>)
+
+(<span class="mdzsyn-symbol">take3</span> (<span class="mdzsyn-symbol">ones</span>)) <span class="mdzsyn-comment"># =&gt; @[1 1 1]</span>
+<span class="mdzsyn-comment"># .. but also</span>
+(<span class="mdzsyn-symbol">take3</span> [<span class="mdzsyn-number">1</span> <span class="mdzsyn-number">2</span> <span class="mdzsyn-number">3</span> <span class="mdzsyn-number">4</span>]) <span class="mdzsyn-comment"># =&gt; @[1 2 3])</span></code></pre><h3 id="Knowing-when-to-stop-31">Knowing when to stop 
+</h3>
+<p>Not all generators are infinite and often want to go through all values of a
+generator and stop when nothing is left. Conveniently <code class="mendoza-code">next</code> will return
+<code class="mendoza-code">nil</code> when there is no more value to take.
+</p>
+
+<pre class="mendoza-codeblock"><code data-language="janet">(<span class="mdzsyn-coresym">defn</span> <span class="mdzsyn-symbol">chain2</span>
+  <span class="mdzsyn-string">"Chain two fibers or data structures together"</span>
+  [<span class="mdzsyn-symbol">a</span> <span class="mdzsyn-symbol">b</span>]
+ (<span class="mdzsyn-coresym">fiber-fn</span> <span class="mdzsyn-keyword">:y</span> [] 
+    (<span class="mdzsyn-coresym">var</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">next</span> <span class="mdzsyn-symbol">a</span>))
+    (<span class="mdzsyn-coresym">while</span> (<span class="mdzsyn-coresym">not=</span> <span class="mdzsyn-symbol">k</span> <span class="mdzsyn-constant">nil</span>) 
+      (<span class="mdzsyn-coresym">yield</span> (<span class="mdzsyn-coresym">in</span> <span class="mdzsyn-symbol">a</span> <span class="mdzsyn-symbol">k</span>))
+      (<span class="mdzsyn-coresym">set</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">next</span> <span class="mdzsyn-symbol">a</span> <span class="mdzsyn-symbol">k</span>)))
+    <span class="mdzsyn-comment"># onto the second input...</span>
+    (<span class="mdzsyn-coresym">set</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">next</span> <span class="mdzsyn-symbol">b</span>))
+    (<span class="mdzsyn-coresym">while</span> (<span class="mdzsyn-coresym">not=</span> <span class="mdzsyn-symbol">k</span> <span class="mdzsyn-constant">nil</span>) 
+      (<span class="mdzsyn-coresym">yield</span> (<span class="mdzsyn-coresym">in</span> <span class="mdzsyn-symbol">b</span> <span class="mdzsyn-symbol">k</span>))
+      (<span class="mdzsyn-coresym">set</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">next</span> <span class="mdzsyn-symbol">b</span> <span class="mdzsyn-symbol">k</span>)))))
+
+(<span class="mdzsyn-coresym">values</span> (<span class="mdzsyn-symbol">chain2</span> [<span class="mdzsyn-number">1</span> <span class="mdzsyn-number">2</span> <span class="mdzsyn-number">3</span>] [<span class="mdzsyn-number">10</span> <span class="mdzsyn-number">11</span> <span class="mdzsyn-number">12</span> <span class="mdzsyn-number">13</span>])) <span class="mdzsyn-comment"># =&gt; @[1 2 3 10 11 12 13]</span>
+<span class="mdzsyn-comment"># note: `values` takes all the values returned by a fiber and </span>
+<span class="mdzsyn-comment"># returns them in an array</span></code></pre>
+        <div class="prevnext-bar">
+          <span class="prev"><a href="../index.html"><span class="prevnext-text">Notes on Janet</span></a></span>
+          <span class="next"><a href="useful.html"><span class="prevnext-text">Useful generators</span></a></span>
+        </div>
+      </div>
+    </div>
+    <script charset="utf-8">
+      function toggleToc() {
+        var toggler = document.getElementById('toc-toggle');
+        var wrapper = document.querySelector('.toc');
+        wrapper.classList.toggle('toc-hidden');
+        toggler.classList.toggle('open');
+        window.localStorage.setItem('show-toc', toggler.classList.contains('open'));
+      }
+      function addTocToggle() {
+        var el = document.getElementById('toc-toggle');
+        el.addEventListener('click', toggleToc);
+      }
+      window.addEventListener('DOMContentLoaded', addTocToggle);
+      if (window.localStorage.getItem('show-toc') === 'true') {
+        toggleToc()
+      }
+    </script>
+    <footer>
+      <div class="content-wrapper">
+        Copyright &copy; Felix Riedel 2021
+      </div>
+    </footer>
+  </body>
+</html>

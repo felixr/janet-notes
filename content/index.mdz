@@ -1,0 +1,17 @@
+{:title "Notes on Janet"
+ :template "mdzdoc/main.html"
+ :author "Felix Riedel"
+ :order 1
+}
+---
+
+A place to document things I learned about Janet so I do not have to figure them out again...
+
+
+## Misc
+
+@ul{
+ @li{@code[map] takes up to 4 inputs, so you can use it to zip arrays together}
+ @li{@code[values] creates an array from values returned by a fiber}
+ @li{@code[generate] is an easy way to create generators using @code[loop] syntax}
+}

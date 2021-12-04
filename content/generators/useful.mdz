@@ -1,0 +1,63 @@
+{:title "Useful generators"
+ :template "mdzdoc/main.html"
+ :author "Felix Riedel"
+}
+---
+
+
+### iota 
+
+Similar to @code[range] but returns a generator instead of an array.
+
+@codeblock[janet]```
+(defn iota [n]
+  (generate [i :range [0 n]] i))
+
+(values (iota 3)) # => @[0 1 2]
+```
+
+
+### zip
+
+Given multiple generators, @code[zip] returns a generator that yields arrays
+with one value from each input generator. It stops when on of the inputs is out
+of elements.
+
+@codeblock[janet]```
+(defn zip
+  [& rest]
+  (fiber/new
+    (fn []
+      (var k (map next rest))
+      (while (every? k)
+        (yield (seq [i :range [0 (length rest)]]
+                 (in (in rest i) (in k i))))
+        (set k (seq [i :range [0 (length rest)]]
+                 (next (in rest i) (in k i))))))))
+
+(values (zip ["a" "b" "c"] (iota 100))) # => @[0 1 2] @[@["a" 0] @["b" 1] @["c" 2]]
+
+# Note: `map` can also take up to 4 generators or data structures
+(map tuple ["a" "b" "c"] (iota 100)) # => @[("a" 0) ("b" 1) ("c" 2)]
+```
+
+### window
+
+@codeblock[janet]```
+(defn window [n ds]
+  (fiber-fn :yi []
+            (var k (next ds))
+            (var win @[])
+            (loop [:repeat n]
+              (array/push win (in ds k))
+              (set k (next ds k)))
+            (yield win)
+            (while (not= k nil)
+              (set win (array/slice win 1))
+              (array/push win (in ds k))
+              (yield win)
+              (set k (next ds k)))
+            win))
+
+(values (window 3 (iota 5))) # => @[@[0 1 2] @[1 2 3] @[2 3 4]]
+```
