@@ -37,7 +37,8 @@ of elements.
 
 (values (zip ["a" "b" "c"] (iota 100))) # => @[0 1 2] @[@["a" 0] @["b" 1] @["c" 2]]
 
-# Note: `map` can also take up to 4 generators or data structures
+# Note: `map` can be used in a similar way, as long as one of the arguments is
+# not an infinite generator
 (map tuple ["a" "b" "c"] (iota 100)) # => @[("a" 0) ("b" 1) ("c" 2)]
 ```
 
@@ -60,4 +61,19 @@ of elements.
             win))
 
 (values (window 3 (iota 5))) # => @[@[0 1 2] @[1 2 3] @[2 3 4]]
+```
+
+
+### chain
+
+@codeblock[janet]```
+(defn chain
+  "Chain multiple fibers or data structures together"
+  [& fbrs]
+ (coro 
+   (loop [fb :in fbrs]
+    (var k (next fb))
+    (while (not= k nil) 
+      (yield (in fb k))
+      (set k (next fb k))))))
 ```

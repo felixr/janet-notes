@@ -10,8 +10,17 @@ A place to document things I learned about Janet so I do not have to figure them
 
 ## Misc
 
+### Map works as zip
+
+@codeblock[janet]```
+(map tuple ["a" "b" "c"] (range 10)) # => @[("a" 0) ("b" 1) ("c" 2)]
+```
+
+### Generators
+
+See @link[generators] and @link[/generators/useful.html]{useful generators}.
+
 @ul{
- @li{@code[map] takes up to 4 inputs, so you can use it to zip arrays together}
  @li{@code[values] creates an array from values returned by a fiber}
  @li{@code[generate] is an easy way to create generators using @code[loop] syntax}
 }

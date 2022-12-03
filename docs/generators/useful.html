@@ -33,14 +33,14 @@
         
 
 
-<h3 id="iota-30">iota 
+<h3 id="iota-13">iota 
 </h3>
 <p>Similar to <code class="mendoza-code">range</code> but returns a generator instead of an array.
 </p>
 <pre class="mendoza-codeblock"><code data-language="janet">(<span class="mdzsyn-coresym">defn</span> <span class="mdzsyn-symbol">iota</span> [<span class="mdzsyn-symbol">n</span>]
   (<span class="mdzsyn-coresym">generate</span> [<span class="mdzsyn-symbol">i</span> <span class="mdzsyn-keyword">:range</span> [<span class="mdzsyn-number">0</span> <span class="mdzsyn-symbol">n</span>]] <span class="mdzsyn-symbol">i</span>))
 
-(<span class="mdzsyn-coresym">values</span> (<span class="mdzsyn-symbol">iota</span> <span class="mdzsyn-number">3</span>)) <span class="mdzsyn-comment"># =&gt; @[0 1 2]</span></code></pre><h3 id="zip-27">zip
+(<span class="mdzsyn-coresym">values</span> (<span class="mdzsyn-symbol">iota</span> <span class="mdzsyn-number">3</span>)) <span class="mdzsyn-comment"># =&gt; @[0 1 2]</span></code></pre><h3 id="zip-13">zip
 </h3>
 <p>Given multiple generators, <code class="mendoza-code">zip</code> returns a generator that yields arrays
 with one value from each input generator. It stops when on of the inputs is out
@@ -59,8 +59,9 @@ of elements.
 
 (<span class="mdzsyn-coresym">values</span> (<span class="mdzsyn-symbol">zip</span> [<span class="mdzsyn-string">"a"</span> <span class="mdzsyn-string">"b"</span> <span class="mdzsyn-string">"c"</span>] (<span class="mdzsyn-symbol">iota</span> <span class="mdzsyn-number">100</span>))) <span class="mdzsyn-comment"># =&gt; @[0 1 2] @[@["a" 0] @["b" 1] @["c" 2]]</span>
 
-<span class="mdzsyn-comment"># Note: `map` can also take up to 4 generators or data structures</span>
-(<span class="mdzsyn-coresym">map</span> <span class="mdzsyn-coresym">tuple</span> [<span class="mdzsyn-string">"a"</span> <span class="mdzsyn-string">"b"</span> <span class="mdzsyn-string">"c"</span>] (<span class="mdzsyn-symbol">iota</span> <span class="mdzsyn-number">100</span>)) <span class="mdzsyn-comment"># =&gt; @[("a" 0) ("b" 1) ("c" 2)]</span></code></pre><h3 id="window-14">window
+<span class="mdzsyn-comment"># Note: `map` can be used in a similar way, as long as one of the arguments is</span>
+<span class="mdzsyn-comment"># not an infinite generator</span>
+(<span class="mdzsyn-coresym">map</span> <span class="mdzsyn-coresym">tuple</span> [<span class="mdzsyn-string">"a"</span> <span class="mdzsyn-string">"b"</span> <span class="mdzsyn-string">"c"</span>] (<span class="mdzsyn-symbol">iota</span> <span class="mdzsyn-number">100</span>)) <span class="mdzsyn-comment"># =&gt; @[("a" 0) ("b" 1) ("c" 2)]</span></code></pre><h3 id="window-13">window
 </h3>
 <pre class="mendoza-codeblock"><code data-language="janet">(<span class="mdzsyn-coresym">defn</span> <span class="mdzsyn-symbol">window</span> [<span class="mdzsyn-symbol">n</span> <span class="mdzsyn-symbol">ds</span>]
   (<span class="mdzsyn-coresym">fiber-fn</span> <span class="mdzsyn-keyword">:yi</span> []
@@ -77,7 +78,17 @@ of elements.
               (<span class="mdzsyn-coresym">set</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">next</span> <span class="mdzsyn-symbol">ds</span> <span class="mdzsyn-symbol">k</span>)))
             <span class="mdzsyn-symbol">win</span>))
 
-(<span class="mdzsyn-coresym">values</span> (<span class="mdzsyn-symbol">window</span> <span class="mdzsyn-number">3</span> (<span class="mdzsyn-symbol">iota</span> <span class="mdzsyn-number">5</span>))) <span class="mdzsyn-comment"># =&gt; @[@[0 1 2] @[1 2 3] @[2 3 4]]</span></code></pre>
+(<span class="mdzsyn-coresym">values</span> (<span class="mdzsyn-symbol">window</span> <span class="mdzsyn-number">3</span> (<span class="mdzsyn-symbol">iota</span> <span class="mdzsyn-number">5</span>))) <span class="mdzsyn-comment"># =&gt; @[@[0 1 2] @[1 2 3] @[2 3 4]]</span></code></pre><h3 id="chain">chain
+</h3>
+<pre class="mendoza-codeblock"><code data-language="janet">(<span class="mdzsyn-coresym">defn</span> <span class="mdzsyn-symbol">chain</span>
+  <span class="mdzsyn-string">"Chain multiple fibers or data structures together"</span>
+  [<span class="mdzsyn-symbol">&amp;</span> <span class="mdzsyn-symbol">fbrs</span>]
+ (<span class="mdzsyn-coresym">coro</span> 
+   (<span class="mdzsyn-coresym">loop</span> [<span class="mdzsyn-symbol">fb</span> <span class="mdzsyn-keyword">:in</span> <span class="mdzsyn-symbol">fbrs</span>]
+    (<span class="mdzsyn-coresym">var</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">next</span> <span class="mdzsyn-symbol">fb</span>))
+    (<span class="mdzsyn-coresym">while</span> (<span class="mdzsyn-coresym">not=</span> <span class="mdzsyn-symbol">k</span> <span class="mdzsyn-constant">nil</span>) 
+      (<span class="mdzsyn-coresym">yield</span> (<span class="mdzsyn-coresym">in</span> <span class="mdzsyn-symbol">fb</span> <span class="mdzsyn-symbol">k</span>))
+      (<span class="mdzsyn-coresym">set</span> <span class="mdzsyn-symbol">k</span> (<span class="mdzsyn-coresym">next</span> <span class="mdzsyn-symbol">fb</span> <span class="mdzsyn-symbol">k</span>))))))</code></pre>
         <div class="prevnext-bar">
           <span class="prev"><a href="index.html"><span class="prevnext-text">Generators</span></a></span>
           <span class="next"><a href="../index.html"><span class="prevnext-text">Notes on Janet</span></a></span>
@@ -103,7 +114,7 @@ of elements.
     </script>
     <footer>
       <div class="content-wrapper">
-        Copyright &copy; Felix Riedel 2021
+        Copyright &copy; Felix Riedel 2022
       </div>
     </footer>
   </body>

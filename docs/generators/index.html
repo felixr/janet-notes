@@ -47,7 +47,7 @@ generated as you request them. You can use <code class="mendoza-code">resume</co
 the generator), run it to the next <code class="mendoza-code">yield</code> and get the next value.
 </p>
 <pre class="mendoza-codeblock"><code data-language="janet">(<span class="mdzsyn-coresym">defn</span> <span class="mdzsyn-symbol">take3</span> [<span class="mdzsyn-symbol">f</span>]
-  (<span class="mdzsyn-coresym">tuple</span> (<span class="mdzsyn-coresym">resume</span> <span class="mdzsyn-symbol">g</span>) (<span class="mdzsyn-coresym">resume</span> <span class="mdzsyn-symbol">g</span>) (<span class="mdzsyn-coresym">resume</span> <span class="mdzsyn-symbol">g</span>)))</code></pre><h2 id="Using-31">Using <code class="mendoza-code">next</code>
+  (<span class="mdzsyn-coresym">tuple</span> (<span class="mdzsyn-coresym">resume</span> <span class="mdzsyn-symbol">g</span>) (<span class="mdzsyn-coresym">resume</span> <span class="mdzsyn-symbol">g</span>) (<span class="mdzsyn-coresym">resume</span> <span class="mdzsyn-symbol">g</span>)))</code></pre><h2 id="Using-13">Using <code class="mendoza-code">next</code>
 </h2>
 <p>If you want to make <code class="mendoza-code">take3</code> also work with arrays and tuples, you need to
 use <code class="mendoza-code">next</code> to iterate through keys and <code class="mendoza-code">in</code> to retrieve a value:
@@ -64,7 +64,7 @@ use <code class="mendoza-code">next</code> to iterate through keys and <code cla
 
 (<span class="mdzsyn-symbol">take3</span> (<span class="mdzsyn-symbol">ones</span>)) <span class="mdzsyn-comment"># =&gt; @[1 1 1]</span>
 <span class="mdzsyn-comment"># .. but also</span>
-(<span class="mdzsyn-symbol">take3</span> [<span class="mdzsyn-number">1</span> <span class="mdzsyn-number">2</span> <span class="mdzsyn-number">3</span> <span class="mdzsyn-number">4</span>]) <span class="mdzsyn-comment"># =&gt; @[1 2 3])</span></code></pre><h3 id="Knowing-when-to-stop-31">Knowing when to stop 
+(<span class="mdzsyn-symbol">take3</span> [<span class="mdzsyn-number">1</span> <span class="mdzsyn-number">2</span> <span class="mdzsyn-number">3</span> <span class="mdzsyn-number">4</span>]) <span class="mdzsyn-comment"># =&gt; @[1 2 3])</span></code></pre><h3 id="Knowing-when-to-stop-13">Knowing when to stop 
 </h3>
 <p>Not all generators are infinite and often want to go through all values of a
 generator and stop when nothing is left. Conveniently <code class="mendoza-code">next</code> will return
@@ -113,7 +113,7 @@ generator and stop when nothing is left. Conveniently <code class="mendoza-code"
     </script>
     <footer>
       <div class="content-wrapper">
-        Copyright &copy; Felix Riedel 2021
+        Copyright &copy; Felix Riedel 2022
       </div>
     </footer>
   </body>

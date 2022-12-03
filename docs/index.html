@@ -35,10 +35,15 @@
 <p>A place to document things I learned about Janet so I do not have to figure them out again...
 </p>
 
-<h2 id="Misc-6">Misc
+<h2 id="Misc-13">Misc
 </h2>
+<h3 id="Map-works-as-zip-13">Map works as zip
+</h3>
+<pre class="mendoza-codeblock"><code data-language="janet">(<span class="mdzsyn-coresym">map</span> <span class="mdzsyn-coresym">tuple</span> [<span class="mdzsyn-string">"a"</span> <span class="mdzsyn-string">"b"</span> <span class="mdzsyn-string">"c"</span>] (<span class="mdzsyn-coresym">range</span> <span class="mdzsyn-number">10</span>)) <span class="mdzsyn-comment"># =&gt; @[("a" 0) ("b" 1) ("c" 2)]</span></code></pre><h3 id="Generators-13">Generators
+</h3>
+<p>See <a href="generators">generators</a> and <a href="/generators/useful.html">useful generators</a>.
+</p>
 <ul>
- <li><code class="mendoza-code">map</code> takes up to 4 inputs, so you can use it to zip arrays together</li>
  <li><code class="mendoza-code">values</code> creates an array from values returned by a fiber</li>
  <li><code class="mendoza-code">generate</code> is an easy way to create generators using <code class="mendoza-code">loop</code> syntax</li>
 </ul>
@@ -67,7 +72,7 @@
     </script>
     <footer>
       <div class="content-wrapper">
-        Copyright &copy; Felix Riedel 2021
+        Copyright &copy; Felix Riedel 2022
       </div>
     </footer>
   </body>
